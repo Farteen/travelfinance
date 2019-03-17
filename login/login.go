@@ -11,13 +11,14 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/mongo/options"
+	"net/http"
 )
 
 func userRegister(ctx *gin.Context) {
 	userRegister := UserUnloggedinInfo{}
 	err := ctx.Bind(&userRegister)
 	if err != nil {
-		ctx.JSON(200, response.NewResponse(
+		ctx.JSON(http.StatusOK, response.NewResponse(
 			UserRegisterInputError,
 			UserRegisterInputErrorMsg,
 			struct {}{}))
@@ -27,7 +28,7 @@ func userRegister(ctx *gin.Context) {
 	if len(userRegister.UserName) == 0 ||
 		len(userRegister.Password) == 0 ||
 		len(userRegister.PhoneNumber) == 0 {
-		ctx.JSON(200, response.NewResponse(UserRegisterInputError, UserRegisterInputErrorMsg, struct {}{}))
+		ctx.JSON(http.StatusOK, response.NewResponse(UserRegisterInputError, UserRegisterInputErrorMsg, struct {}{}))
 		return
 	}
 	//TODO: user info validation,
@@ -35,9 +36,11 @@ func userRegister(ctx *gin.Context) {
 	// like phone validation, etc.
 
 	//userNameKey := "user:" + "username:" + userRegister.UserName
-	_, userNameInRedisErr := redisclient.RedisClient().Get(UserNamesRedisSetKey).Result()
+	_, userNameInRedisErr := redisclient.RedisClient().SIsMember(
+		UserNamesRedisSetKey,
+		userRegister.UserName).Result()
 	if userNameInRedisErr != nil {
-		ctx.JSON(200, response.NewResponse(
+		ctx.JSON(http.StatusOK, response.NewResponse(
 			UserRegisterUserNameError,
 			UserRegisterUserNameErrorMsg,
 			struct {}{}))
@@ -45,9 +48,11 @@ func userRegister(ctx *gin.Context) {
 	}
 
 	//userPhoneToId := "user:" + "userphone:" + userRegister.PhoneNumber
-	_, userPhoneInRedisErr := redisclient.RedisClient().Get(UserPhonesRedisSetKey).Result()
+	_, userPhoneInRedisErr := redisclient.RedisClient().SIsMember(
+		UserPhonesRedisSetKey,
+		userRegister.PhoneNumber).Result()
 	if userPhoneInRedisErr != nil {
-		ctx.JSON(200, response.NewResponse(
+		ctx.JSON(http.StatusOK, response.NewResponse(
 			UserRegisterUserNameError,
 			UserRegisterUserNameErrorMsg,
 			struct {}{}))
@@ -66,7 +71,7 @@ func userRegister(ctx *gin.Context) {
 	insertId := mongodbInsertResult.InsertedID
 	_, ok := insertId.(primitive.ObjectID)
 	if !ok || mongodbInsertErr != nil {
-		ctx.JSON(200, response.NewResponse(
+		ctx.JSON(http.StatusOK, response.NewResponse(
 			UserRegisterPersistanceError,
 			UserRegisterPersistanceErrorMsg,
 			struct {}{}))
@@ -83,7 +88,7 @@ func userRegister(ctx *gin.Context) {
 	//	SetNX(userNameKey, userId, time.Duration(0)).Result()
 
 	//if userNameError != nil || userNameResult == false {
-	//	ctx.JSON(200, response.NewResponse(
+	//	ctx.JSON(http.StatusOK, response.NewResponse(
 	//		UserRegisterUserNameError,
 	//		UserRegisterUserNameErrorMsg,
 	//		struct {}{}))
@@ -93,7 +98,7 @@ func userRegister(ctx *gin.Context) {
 	//	SetNX(userPhoneToId, userId, time.Duration(0)).Result()
 
 	//if userPhoneError != nil || userPhoneResult == false {
-	//	ctx.JSON(200, response.NewResponse(
+	//	ctx.JSON(http.StatusOK, response.NewResponse(
 	//		UserRegisterUserPhoneError,
 	//		UserRegisterUserPhoneErrorMsg,
 	//		struct {}{}))
@@ -103,30 +108,30 @@ func userRegister(ctx *gin.Context) {
 	//	SetNX(UserIdsRedisSetKey, userId, time.Duration(0)).Result()
 	//
 	//if userIdError != nil || userIdResult == false {
-	//	ctx.JSON(200,
+	//	ctx.JSON(http.StatusOK,
 	//		response.NewResponse(
 	//			UserRegisterIdGenerationError,
 	//			UserRegisterIdGenerationErrorMsg,
 	//			struct {}{}))
 	//	return
 	//}
-	ctx.JSON(200, response.NewResponse(UserRegisterNoError, UserRegisterNoErrorMsg, struct {}{}))
+	ctx.JSON(http.StatusOK, response.NewResponse(UserRegisterNoError, UserRegisterNoErrorMsg, struct {}{}))
 }
 
 func userLogin(ctx *gin.Context) {
 	//ctx.SetCookie(UserCookieUID, "123", CookieMaxAge, "/", "localhost", false, true)
-	//ctx.JSON(200, response.NewResponse(UserLoginNoError, UserLoginNoErrorMsg, struct {}{}))
+	//ctx.JSON(http.StatusOK, response.NewResponse(UserLoginNoError, UserLoginNoErrorMsg, struct {}{}))
 
 	userLogin := UserUnloggedinInfo{}
 	err := ctx.Bind(&userLogin)
 	if err != nil {
-		ctx.JSON(200, response.NewResponse(UserLoginInputError, UserLoginInputErrorMsg, struct {}{}))
+		ctx.JSON(http.StatusOK, response.NewResponse(UserLoginInputError, UserLoginInputErrorMsg, struct {}{}))
 		return
 	}
-	filter := bson.M{"phone" : userLogin.PhoneNumber}
+	filter := bson.M{"phonenumber" : userLogin.PhoneNumber}
 	singleResult := mongoclient.Collection(MongoDBUserCollection).FindOne(context.Background(), filter, options.FindOne())
 	if singleResult.Err() != nil {
-		ctx.JSON(200, response.NewResponse(
+		ctx.JSON(http.StatusOK, response.NewResponse(
 			UserLoginUserNotFoundError,
 			UserLoginInputErrorMsg, struct {}{}))
 		return
@@ -135,14 +140,14 @@ func userLogin(ctx *gin.Context) {
 	loginPwdMd5Str := util.MD5String(userLogin.Password)
 	decodeUserErr := singleResult.Decode(userLogin)
 	if decodeUserErr != nil {
-		ctx.JSON(200, response.NewResponse(
+		ctx.JSON(http.StatusOK, response.NewResponse(
 			UserLoginUserNotFoundError,
 			UserLoginUserNotFoundErrorMsg,
 			struct {}{}))
 		return
 	}
 	if loginPwdMd5Str != userLogin.Password {
-		ctx.JSON(200, response.NewResponse(
+		ctx.JSON(http.StatusOK, response.NewResponse(
 			UserLoginUserNotFoundError,
 			UserLoginInputErrorMsg,
 			struct {}{}))
@@ -150,14 +155,14 @@ func userLogin(ctx *gin.Context) {
 	}
 
 	ctx.SetCookie(cookie.UserCookieUID, userLogin.ID, cookie.CookieMaxAge, "/", "localhost", false, true)
-	ctx.JSON(200, response.NewResponse(UserLoginNoError, UserLoginNoErrorMsg, struct {}{}))
+	ctx.JSON(http.StatusOK, response.NewResponse(UserLoginNoError, UserLoginNoErrorMsg, struct {}{}))
 }
 
 func readCookie(ctx *gin.Context) {
 	result, err := ctx.Cookie(cookie.UserCookieUID)
 	if err != nil {
-		ctx.JSON(200, response.NewResponse(-1, "cookie error", struct {}{}))
+		ctx.JSON(http.StatusOK, response.NewResponse(-1, "cookie error", struct {}{}))
 		return
 	}
-	ctx.JSON(200, response.NewResponse(0, "cookie read success", result))
+	ctx.JSON(http.StatusOK, response.NewResponse(0, "cookie read success", result))
 }
