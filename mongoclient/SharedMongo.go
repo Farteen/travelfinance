@@ -23,7 +23,7 @@ func MongoClient() *mongo.Client {
 	once.Do(func() {
 		client, err := mongo.NewClient("mongodb://localhost:27017")
 		if err != nil {
-			log.Fatal("fata error init mongo client")
+			log.Fatal("fatal error init mongo client")
 		}
 		ctx, _ := context.WithTimeout(context.Background(), 10 * time.Second)
 		err = client.Connect(ctx)
@@ -37,7 +37,7 @@ func MongoClient() *mongo.Client {
 	return sg.mongoClient
 }
 
-func MongoDBCollectionWithName(collectionName string) *mongo.Collection {
+func Collection(collectionName string) *mongo.Collection {
 	collection := MongoClient().Database("travelfinance").Collection(collectionName)
 	return collection
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/Farteen/travelfinance/event"
 	"github.com/Farteen/travelfinance/login"
 	"github.com/gin-gonic/gin"
 )
@@ -15,8 +16,8 @@ type RegisterBody struct {
 
 func main() {
 	router := gin.Default()
-	login.RegisterLoginRouter(router)
-
+	login.RegisterRouter(router)
+	event.RegisterRouter(router)
 	router.Run("localhost:8080")
 }
 
