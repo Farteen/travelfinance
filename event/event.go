@@ -35,11 +35,11 @@ func allEvents(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, response.NewResponse(0, "event list success", eiList))
 }
 
-func eventItem(ctx *gin.Context) {
+func eventCreation(ctx *gin.Context) {
 
 }
 
-func eventCreation(ctx *gin.Context) {
+func eventItem(ctx *gin.Context) {
 
 }
 
