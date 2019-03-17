@@ -36,6 +36,16 @@ func allEvents(ctx *gin.Context) {
 }
 
 func eventCreation(ctx *gin.Context) {
+	eventItem := EventItem{}
+	err := ctx.Bind(eventItem)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response.NewResponse(
+			EventCreationFailedErr,
+			EventCreationFailedErrMsg, struct {}{}))
+		return
+	}
+
+
 
 }
 
