@@ -138,7 +138,8 @@ func userLogin(ctx *gin.Context) {
 	}
 
 	loginPwdMd5Str := util.MD5String(userLogin.Password)
-	decodeUserErr := singleResult.Decode(userLogin)
+	//MARK:Decode方法带的是一个指针
+	decodeUserErr := singleResult.Decode(&userLogin)
 	if decodeUserErr != nil {
 		ctx.JSON(http.StatusOK, response.NewResponse(
 			UserLoginUserNotFoundError,
