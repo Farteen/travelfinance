@@ -155,7 +155,7 @@ func userLogin(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie(cookie.UserCookieUID, userLogin.ID, cookie.CookieMaxAge, "/", "localhost", false, true)
+	ctx.SetCookie(cookie.UserCookieUID, userLogin.ID.Hex(), cookie.CookieMaxAge, "/", "localhost", false, true)
 	ctx.JSON(http.StatusOK, response.NewResponse(UserLoginNoError, UserLoginNoErrorMsg, struct {}{}))
 }
 
