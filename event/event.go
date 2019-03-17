@@ -6,7 +6,7 @@ import (
 )
 
 type AllEventsRequest struct {
-
+	UserID string
 }
 
 func allEvents(ctx *gin.Context) {
