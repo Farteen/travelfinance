@@ -10,4 +10,5 @@ const (
 
 const (
 	EventCreationFailedErrMsg = "创建事件失败"
+	EventMongoQueryBatchSize = 10
 )

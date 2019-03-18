@@ -15,7 +15,7 @@ import (
 )
 
 func userRegister(ctx *gin.Context) {
-	userRegister := UserUnloggedinInfo{}
+	userRegister := UserInfo{}
 	err := ctx.Bind(&userRegister)
 	if err != nil {
 		ctx.JSON(http.StatusOK, response.NewResponse(
@@ -36,10 +36,10 @@ func userRegister(ctx *gin.Context) {
 	// like phone validation, etc.
 
 	//userNameKey := "user:" + "username:" + userRegister.UserName
-	_, userNameInRedisErr := redisclient.RedisClient().SIsMember(
+	userNameExists, userNameInRedisErr := redisclient.RedisClient().SIsMember(
 		UserNamesRedisSetKey,
 		userRegister.UserName).Result()
-	if userNameInRedisErr != nil {
+	if userNameInRedisErr != nil || userNameExists {
 		ctx.JSON(http.StatusOK, response.NewResponse(
 			UserRegisterUserNameError,
 			UserRegisterUserNameErrorMsg,
@@ -47,11 +47,10 @@ func userRegister(ctx *gin.Context) {
 		return
 	}
 
-	//userPhoneToId := "user:" + "userphone:" + userRegister.PhoneNumber
-	_, userPhoneInRedisErr := redisclient.RedisClient().SIsMember(
+	userPhoneExists, userPhoneInRedisErr := redisclient.RedisClient().SIsMember(
 		UserPhonesRedisSetKey,
 		userRegister.PhoneNumber).Result()
-	if userPhoneInRedisErr != nil {
+	if userPhoneInRedisErr != nil || userPhoneExists {
 		ctx.JSON(http.StatusOK, response.NewResponse(
 			UserRegisterUserNameError,
 			UserRegisterUserNameErrorMsg,
@@ -78,58 +77,26 @@ func userRegister(ctx *gin.Context) {
 		return
 	}
 
-	////TODO: unit testing
-	//userId := hex.EncodeToString(oid[0:])
 	redisclient.RedisClient().SAdd(UserNamesRedisSetKey, userRegister.UserName)
 	redisclient.RedisClient().SAdd(UserPhonesRedisSetKey, userRegister.PhoneNumber)
 
-	//
-	//redisclient.RedisClient().
-	//	SetNX(userNameKey, userId, time.Duration(0)).Result()
-
-	//if userNameError != nil || userNameResult == false {
-	//	ctx.JSON(http.StatusOK, response.NewResponse(
-	//		UserRegisterUserNameError,
-	//		UserRegisterUserNameErrorMsg,
-	//		struct {}{}))
-	//	return
-	//}
-	//redisclient.RedisClient().
-	//	SetNX(userPhoneToId, userId, time.Duration(0)).Result()
-
-	//if userPhoneError != nil || userPhoneResult == false {
-	//	ctx.JSON(http.StatusOK, response.NewResponse(
-	//		UserRegisterUserPhoneError,
-	//		UserRegisterUserPhoneErrorMsg,
-	//		struct {}{}))
-	//	return
-	//}
-	//userIdResult, userIdError := redisclient.RedisClient().
-	//	SetNX(UserIdsRedisSetKey, userId, time.Duration(0)).Result()
-	//
-	//if userIdError != nil || userIdResult == false {
-	//	ctx.JSON(http.StatusOK,
-	//		response.NewResponse(
-	//			UserRegisterIdGenerationError,
-	//			UserRegisterIdGenerationErrorMsg,
-	//			struct {}{}))
-	//	return
-	//}
 	ctx.JSON(http.StatusOK, response.NewResponse(UserRegisterNoError, UserRegisterNoErrorMsg, struct {}{}))
 }
 
 func userLogin(ctx *gin.Context) {
-	//ctx.SetCookie(UserCookieUID, "123", CookieMaxAge, "/", "localhost", false, true)
-	//ctx.JSON(http.StatusOK, response.NewResponse(UserLoginNoError, UserLoginNoErrorMsg, struct {}{}))
 
-	userLogin := UserUnloggedinInfo{}
+	userLogin := UserInfo{}
 	err := ctx.Bind(&userLogin)
 	if err != nil {
 		ctx.JSON(http.StatusOK, response.NewResponse(UserLoginInputError, UserLoginInputErrorMsg, struct {}{}))
 		return
 	}
 	filter := bson.M{"phonenumber" : userLogin.PhoneNumber}
-	singleResult := mongoclient.Collection(MongoDBUserCollection).FindOne(context.Background(), filter, options.FindOne())
+	singleResult := mongoclient.Collection(MongoDBUserCollection).
+		FindOne(context.Background(),
+			filter,
+			options.FindOne())
+
 	if singleResult.Err() != nil {
 		ctx.JSON(http.StatusOK, response.NewResponse(
 			UserLoginUserNotFoundError,
@@ -150,13 +117,25 @@ func userLogin(ctx *gin.Context) {
 	if loginPwdMd5Str != userLogin.Password {
 		ctx.JSON(http.StatusOK, response.NewResponse(
 			UserLoginUserNotFoundError,
-			UserLoginInputErrorMsg,
+			UserLoginUserNotFoundErrorMsg,
 			struct {}{}))
 		return
 	}
 
-	ctx.SetCookie(cookie.UserCookieUID, userLogin.ID.Hex(), cookie.CookieMaxAge, "/", "localhost", false, true)
-	ctx.JSON(http.StatusOK, response.NewResponse(UserLoginNoError, UserLoginNoErrorMsg, struct {}{}))
+	ctx.SetCookie(
+		cookie.UserCookieUID,
+		userLogin.ID.Hex(),
+		cookie.CookieMaxAge,
+		"/",
+		"localhost",
+		false,
+		true)
+	ctx.JSON(
+		http.StatusOK,
+		response.NewResponse(
+			UserLoginNoError,
+			UserLoginNoErrorMsg,
+			struct {}{}))
 }
 
 func readCookie(ctx *gin.Context) {

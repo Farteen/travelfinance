@@ -2,8 +2,11 @@ package main
 
 import (
 	"github.com/Farteen/travelfinance/event"
+	"github.com/Farteen/travelfinance/eventgroup"
+	"github.com/Farteen/travelfinance/fileupload"
 	"github.com/Farteen/travelfinance/login"
 	"github.com/Farteen/travelfinance/staticassets"
+	"github.com/Farteen/travelfinance/usergroup"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,6 +22,9 @@ func main() {
 	router := gin.Default()
 	login.RegisterRouter(router)
 	event.RegisterRouter(router)
+	fileupload.RegisterRouter(router)
+	usergroup.RegisterRouter(router)
+	eventgroup.RegisterRouter(router)
 	staticassets.RegisterRouter(router)
 	router.Run("localhost:8080")
 }

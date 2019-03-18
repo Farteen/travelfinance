@@ -2,8 +2,8 @@ package mongoclient
 
 import (
 	"context"
-	"github.com/gpmgo/gopm/modules/log"
 	"github.com/mongodb/mongo-go-driver/mongo"
+	"log"
 	"sync"
 	"time"
 )
@@ -23,12 +23,12 @@ func MongoClient() *mongo.Client {
 	once.Do(func() {
 		client, err := mongo.NewClient("mongodb://localhost:27017")
 		if err != nil {
-			log.Fatal("fatal error init mongo client")
+			log.Println("fatal error init mongo client")
 		}
 		ctx, _ := context.WithTimeout(context.Background(), 10 * time.Second)
 		err = client.Connect(ctx)
 		if err != nil {
-			log.Fatal("mongodb connect err")
+			log.Println("mongodb connect err")
 		}
 		sg = &singleton{
 			client,
