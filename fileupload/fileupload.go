@@ -5,8 +5,8 @@ import (
 	"github.com/Farteen/travelfinance/mongoclient"
 	"github.com/Farteen/travelfinance/response"
 	"github.com/Farteen/travelfinance/staticassets"
+	"github.com/Farteen/travelfinance/util"
 	"github.com/gin-gonic/gin"
-	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/mongo/options"
 	"net/http"
 )
@@ -38,8 +38,7 @@ func UploadFile(ctx *gin.Context) {
 		return
 	}
 
-	hexString := insertOID.InsertedID.(primitive.ObjectID)
-	fileName := hexString.Hex()
+	fileName := util.MongoDBHexID(insertOID)
 	//fileType := file.Header.Get("Content-Type")
 	staticAssetServer := StaticAssetsHostName
 	localFilePath := staticassets.StaticAssetRelativeLocalPathComponent + "/" + fileName + ".png"
