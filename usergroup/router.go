@@ -11,7 +11,7 @@ func RegisterRouter(engine *gin.Engine) {
 	{
 		group.GET("", UserGroupList)
 		group.POST("/new", UserGroupCreation)
+		//group.POST("/:id", UserGroupAddUser)
 		group.DELETE("/:id", UserGroupDeletion)
-		group.POST("/:id/:uid", UserGroupAddUser)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/Farteen/travelfinance/fileupload"
 	"github.com/Farteen/travelfinance/login"
 	"github.com/Farteen/travelfinance/staticassets"
+	"github.com/Farteen/travelfinance/usergroup"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,6 +22,7 @@ func main() {
 	login.RegisterRouter(router)
 	event.RegisterRouter(router)
 	fileupload.RegisterRouter(router)
+	usergroup.RegisterRouter(router)
 	staticassets.RegisterRouter(router)
 	router.Run("localhost:8080")
 }
