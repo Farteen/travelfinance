@@ -1,5 +1,8 @@
 package fileupload
 
-type UploadFileItemResponse struct {
-	FileURL string	`json:"file_url"`
+type UploadFileItem struct {
+	FileURL string	`json:"file_url" bson:"file_url"`
+	FileName string `json:"file_name" bson:"file_name"`
 }
+
+
