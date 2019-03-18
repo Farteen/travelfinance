@@ -38,8 +38,12 @@ func allEvents(ctx *gin.Context) {
 
 func eventCreation(ctx *gin.Context) {
 	ei := EventItem{}
- 	eiErr := ctx.Bind(ei)
- 	if eiErr != nil {
+ 	eiErr := ctx.Bind(&ei)
+ 	if eiErr != nil ||
+ 		len(ei.GroupID.Hex()) == 0 ||
+ 		len(ei.Name) == 0 ||
+ 		len(ei.CreatorID.Hex()) == 0 ||
+ 		len(ei.Images) == 0 {
  		ctx.JSON(http.StatusBadRequest, response.NewResponse(1000, "bad request", struct {}{}))
 		return
 	}

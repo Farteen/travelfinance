@@ -7,7 +7,7 @@ import (
 
 func RegisterRouter(engine *gin.Engine) {
 	eventGroup := engine.Group("/event")
-	eventGroup.Use(middleware.RedisSessionMiddleWare)
+	eventGroup.Use(middleware.CookieUIDAuthMiddleWare)
 	{
 		eventGroup.POST("/all", allEvents)
 		eventGroup.POST("/new", eventCreation)

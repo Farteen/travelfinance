@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func RedisSessionMiddleWare(ctx *gin.Context) {
+func CookieUIDAuthMiddleWare(ctx *gin.Context) {
 	result, err := ctx.Cookie(cookie.UserCookieUID)
 	if len(result) == 0 || err != nil {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, struct {}{})
