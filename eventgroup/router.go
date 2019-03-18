@@ -10,6 +10,7 @@ func RegisterRouter(engine *gin.Engine) {
 	eventGroupRouter.Use(middleware.CookieUIDAuthMiddleWare)
 	{
 		eventGroupRouter.GET("/all", allEventGroups)
-		eventGroupRouter.POST("/{groupId}", addEventToGroup)
+		eventGroupRouter.POST("/new", createEventGroup)
+		eventGroupRouter.POST("/id/:id", addEventToGroup)
 	}
 }

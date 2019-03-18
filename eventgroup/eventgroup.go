@@ -99,3 +99,41 @@ func addEventToGroup(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, response.NewResponse(0, "添加成功", eventGroupInDB))
 }
+
+func createEventGroup(ctx *gin.Context) {
+	userId, userIdCookieErr := ctx.Cookie(cookie.UserCookieUID)
+	if userIdCookieErr != nil {
+		ctx.JSON(http.StatusBadRequest, response.NewResponse(1000, "暂无权限", struct {
+		}{}))
+		return
+	}
+
+	userIdOID, userIdOIDErr := primitive.ObjectIDFromHex(userId)
+	if userIdOIDErr != nil {
+		ctx.JSON(http.StatusBadRequest, response.NewResponse(1000, "暂无权限", struct {
+		}{}))
+		return
+	}
+
+	eventGroup := EventGroup{}
+	eventGroup.UserId = userIdOID
+
+	eventGroupAddingErr := ctx.Bind(&eventGroup)
+	if eventGroupAddingErr != nil {
+		ctx.JSON(http.StatusBadRequest, response.NewResponse(1000, "暂无权限", struct {
+		}{}))
+		return
+	}
+
+	eventGroupResult, updateEventGroupResultErr := mongoclient.Collection(MongoDBEventGroupCollection).
+		InsertOne(context.Background(),
+		eventGroup,
+			options.InsertOne())
+	if updateEventGroupResultErr != nil {
+		ctx.JSON(http.StatusBadRequest, response.NewResponse(1000, "更新失败", struct {
+		}{}))
+		return
+	}
+	eventGroup.EventGroupId = util.MongoDBOID(eventGroupResult)
+	ctx.JSON(http.StatusOK, response.NewResponse(0, "添加成功", eventGroup))
+}

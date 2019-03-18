@@ -64,9 +64,11 @@ func eventCreation(ctx *gin.Context) {
 }
 
 func eventItem(ctx *gin.Context) {
-
+	id := ctx.Param("id")
+	ctx.JSON(http.StatusOK, response.NewResponse(200, "fetch", id))
 }
 
 func eventDeletion(ctx *gin.Context) {
-
+	id := ctx.Param("id")
+	ctx.JSON(http.StatusOK, response.NewResponse(200, "delete", id))
 }
