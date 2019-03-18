@@ -6,13 +6,15 @@ import (
 )
 
 func RegisterRouter(engine *gin.Engine) {
-	eventGroup := engine.Group("/event")
-	eventGroup.Use(middleware.CookieUIDAuthMiddleWare)
+	eventRouter := engine.Group("/event")
+	eventRouter.Use(middleware.CookieUIDAuthMiddleWare)
 	{
-		eventGroup.GET("/all", allEvents)
-		eventGroup.POST("/new", eventCreation)
-		eventGroup.GET("/{id}", eventItem)
-		eventGroup.DELETE("/{id}", eventDeletion)
+		eventRouter.GET("/all", allEvents)
+		eventRouter.POST("/new", eventCreation)
+		eventRouter.GET("/{id}", eventItem)
+		eventRouter.DELETE("/{id}", eventDeletion)
 	}
+
+
 
 }

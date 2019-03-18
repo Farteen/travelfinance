@@ -40,7 +40,7 @@ func eventCreation(ctx *gin.Context) {
 	ei := EventItem{}
  	eiErr := ctx.Bind(&ei)
  	if eiErr != nil ||
- 		len(ei.GroupID.Hex()) == 0 ||
+ 		//len(ei.GroupID.Hex()) == 0 ||
  		len(ei.Name) == 0 ||
  		len(ei.CreatorID.Hex()) == 0 ||
  		len(ei.Images) == 0 {
