@@ -24,7 +24,7 @@ func allEvents(ctx *gin.Context) {
 	cursor, err := mongoclient.Collection(MongoEventCollection).Find(
 		context.Background(),
 		filter,
-		options.Find().SetBatchSize(10))
+		options.Find().SetBatchSize(EventMongoQueryBatchSize))
 	eiList := make([]EventItem, 0)
 	for cursor.Next(context.Background()) {
 	 	ei := EventItem{}

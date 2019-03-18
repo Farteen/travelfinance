@@ -9,9 +9,9 @@ func RegisterRouter(engine *gin.Engine) {
 	group := engine.Group("/group")
 	group.Use(middleware.CookieUIDAuthMiddleWare)
 	{
-		group.GET("", UserGroupList)
+		group.GET("/all", UserGroupList)
 		group.POST("/new", UserGroupCreation)
-		//group.POST("/:id", UserGroupAddUser)
-		group.DELETE("/:id", UserGroupDeletion)
+		group.POST("/{id}", UserGroupAddUser)
+		group.DELETE("/{id}", UserGroupDeletion)
 	}
 }

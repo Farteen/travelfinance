@@ -6,4 +6,5 @@ const (
 
 const (
 	UserGroupMaxCountLimit = 5
+	UserGroupFindBatchSize = 10
 )
